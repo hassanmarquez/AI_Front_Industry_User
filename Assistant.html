@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Metric Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 140px; /* Further increased width */
+            background: #fff;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .profile {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .custom-avatar-img img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-email {
+            font-size: 0.875rem;
+            color: #888;
+        }
+
+        .nav-section {
+            margin-bottom: 40px; /* Increased gap */
+        }
+
+        .nav-title {
+            padding: 20px 20px 0 20px; /* Added top padding to move down */
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 10px;
+            text-align: center; /* Center the text */
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Center the icons */
+            gap: 24px; /* Increased gap */
+            color: #555;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #e0e0e0;
+            color: #000;
+        }
+
+        .nav-item.active {
+            background-color: #d0d0d0;
+            color: #000;
+        }
+
+        .nav-item i {
+            width: 24px;
+            height: 24px; /* Ensure icons are square */
+            font-size: 24px; /* Set icon size */
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 60px; /* Further moved up */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Adjust for centering */
+            color: #dc3545;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+        }
+
+        .logout i {
+            width: 24px;
+            height: 24px; /* Ensure icons are square */
+            font-size: 24px; /* Set icon size */
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 0;
+            flex: 1;
+            padding: 0; /* Remove padding */
+            background: #f8f9fa;
+            display: flex; /* Add flex display */
+            height: 100vh; /* Full height */
+            width: calc(100vw - 140px); /* Full width minus sidebar width */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        .left-section {
+            flex: 2; /* Increase the size of the left section */
+            padding: 24px;
+            overflow-y: auto; /* Enable scrolling */
+            background: #fff;
+            border-right: 1px solid #e6e6e6;
+        }
+
+        .right-section {
+            flex: 1; /* Reduce the size of the right section */
+            padding: 24px;
+            overflow-y: auto; /* Enable scrolling */
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: #007bff;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 16px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+            padding: 16px;
+            background: #fff;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .chat-input button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .chat-input button:active {
+            background-color: #004085;
+        }
+
+        .assistant {
+            background: #ffbb00;
+            color: #333;
+            padding: 12px;
+            margin-top: 10px;
+            margin-left: 20%;
+            margin-right: 0;
+            text-align: left;
+            font-size: 18px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+        }
+
+        .user {
+            background: #0084ff;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            margin-left: 0;
+            margin-right: 20%;
+            text-align: left;
+        }
+
+        .plot {
+            display: block;
+            width: 80%;
+            padding: 40px;
+            margin-top: 0px;
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        .header {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1f1f1f;
+            margin-bottom: 32px;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        select {
+            padding: 8px 32px 8px 12px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+            background: white;
+            appearance: none;
+            background-image: url("image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            min-width: 140px;
+        }
+
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 40px 8px 12px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .refresh-btn {
+            padding: 8px 16px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+            background: white;
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafafa;
+            padding: 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #333;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .feedback-text {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star {
+            font-size: 16px;
+        }
+
+        .red .star { color: #ff4d4f; }
+        .orange .star { color: #faad14; }
+        .green .star { color: #52c41a; }
+        .star.empty { color: #f0f0f0; }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .pagination select {
+            min-width: 80px;
+        }
+
+        .pagination-btn {
+            border: 1px solid #e6e6e6;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Enhanced Button Styles */
+        .start-recognition {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .start-recognition:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .start-recognition:active {
+            background-color: #004085;
+        }
+
+        .start-recognition i, .stop-recognition i {
+            width: 24px;
+            height: 24px; /* Ensure icons are square */
+            font-size: 24px; /* Set icon size */
+        }
+
+        .stop-recognition {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background-color: #ff3c00;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stop-recognition:hover {
+            background-color: #b30000;
+            transform: scale(1.05);
+        }
+
+        .stop-recognition:active {
+            background-color: #850000;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .txt {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e6e6e6;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .controls button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        .controls button:active {
+            background-color: #1e7e34;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="profile">
+                <div class="profile-info">
+                    <a href="Home.html">
+                        <div class="custom-avatar">
+                            <img src="./images/logo.png" alt="Logo" style="width: 100%; height: 100%; ">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">SM</div>
+                <nav class="nav-menu">
+                    <a href="UserManagement.html" class="nav-item">
+                        <i class="fas fa-users"></i>
+                    </a>
+                    <a href="AnalysisMetricAssistant.html" class="nav-item active">
+                        <i class="fas fa-atom"></i>
+                    </a>
+                    <a href="settings.html" class="nav-item">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">CRM</div>
+                <nav class="nav-menu">
+                    <a href="CustomerFeedback.html" class="nav-item">
+                        <i class="fas fa-thumbs-up"></i>
+                    </a>
+                    <a href="Polls.html" class="nav-item">
+                        <i class="fas fa-chart-bar"></i>
+                    </a>
+                </nav>
+            </div>
+
+            <a href="#" class="logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </aside>
+
+        <!-- Main Content -->
+        <!-- Main Content in the right block after here -->
+        <div class="main-content">
+            <!--
+            <div class="left-section">
+                <div class="dashboard">
+                    <div class="stat-card">
+                        <h2>Stat 1</h2>
+                        <p>Value 1</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2>Stat 2</h2>
+                        <p>Value 2</p>
+                    </div>
+                    <div class="stat-card">
+                        <h2>Stat 3</h2>
+                        <p>Value 3</p>
+                    </div>
+                </div>
+            </div>
+            -->
+            <div class="right-section">
+                <div class="chat-container">
+
+                    <div class="chat-messages">
+
+                    </div>
+
+                    <button class="start-recognition">
+                        <i class="fas fa-microphone-alt"></i> Listen
+                    </button>
+                    <button class="stop-recognition" style="display: none;">
+                        <i class="fas fa-stop-circle"></i> Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        /***
+         * Init messages
+         * **/
+        let messages = [];
+        let status = 'init';
+
+        //***
+        //  Recognition code
+        //  https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
+        //***
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+        var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+
+        var recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        var startRecognition = document.querySelector('.start-recognition');
+        var stopRecognition = document.querySelector('.stop-recognition');
+
+        startRecognition.onclick = function() {
+            recognition.start();
+            startRecognition.style.display = "none";
+            stopRecognition.style.display = "block";
+            console.log('Ready to receive a color command.');
+        }
+
+        recognition.onresult = function(event) {
+            // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+            // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+            // It has a getter so it can be accessed like an array
+            // The first [0] returns the SpeechRecognitionResult at the last position.
+            // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
+            // These also have getters so they can be accessed like arrays.
+            // The second [0] returns the SpeechRecognitionAlternative at position 0.
+            // We then return the transcript property of the SpeechRecognitionAlternative object
+            var text_recognized = event.results[0][0].transcript;
+            startRecognition.style.display = "block";
+            stopRecognition.style.display = "none";
+
+            addUserMessage(text_recognized);
+            displayMessages();
+            callApi(text_recognized);
+            console.log('Confidence: ' + event.results[0][0].confidence);
+        }
+
+        recognition.onspeechend = function() {
+            recognition.stop();
+        }
+
+        recognition.onnomatch = function(event) {
+            console.log("I didn't recognise that color.");
+        }
+
+        recognition.onerror = function(event) {
+            console.log('Error occurred in recognition: ' + event.error);
+        }
+
+        //***
+        //  speech code
+        //***
+        const synth = window.speechSynthesis;
+        const inputTxt = document.querySelector(".txt");
+
+        function speak(text) {
+
+            if (synth.speaking) {
+                console.error("speechSynthesis.speaking");
+                return;
+            }
+
+            if (text !== "") {
+                const utterThis = new SpeechSynthesisUtterance(text);
+
+                utterThis.onend = function (event) {
+                    console.log("SpeechSynthesisUtterance.onend");
+                };
+
+                utterThis.onerror = function (event) {
+                    console.error("SpeechSynthesisUtterance.onerror");
+                };
+
+                const selectedOption = 'Microsoft Aria Online (Natural) - English (United States)'; 
+                //const selectedOption = 'Google US English'; //'en-US'
+                //const selectedOption = 'Microsoft Zira - English (United States)'
+                const voices = synth.getVoices();
+
+                for (let i = 0; i < voices.length; i++) {
+                    //console.log(voices[i].name);
+                    if (voices[i].name === selectedOption) {
+                        utterThis.voice = voices[i];
+                        break;
+                    }
+                }
+                utterThis.pitch = 1;  //min="0" max="2"
+                utterThis.rate = 1;   //min="0.5" max="2"
+                synth.speak(utterThis);
+            }
+        }
+
+        function addMessage(role, content, image) {
+            messages.push({ role: role, content: content, image: image });
+        }
+
+        function addAssitantMessage(data) {
+            addMessage('assistant', data.summary, data.image_name);
+        }
+
+        function addUserMessage(content) {
+            addMessage('user', content, '');
+        }
+
+        function changeStatus(s) {
+            switch (s) {
+                case "init":
+                    status = "status";
+                    break;
+                case "status":
+                    status = "alerts";
+                    break;
+                case "alerts":
+                    status = "critical";
+                    break;
+                case "critical":
+                    status = "explain";
+                    break;
+                case "explain":
+                    status = "schedule";
+                    break;
+                default:
+                    status = "status";
+                    break;
+            }
+        }
+
+        function callApi(task_requested) {
+            const uri = 'https://api-assistant.azurewebsites.net/' + 'assistant/analysis_data';
+
+            changeStatus(status);
+            console.log('status: ' + status);
+
+            const chatRequest =
+            {
+                status: status,
+                task: task_requested
+            }
+
+            fetch(uri, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(chatRequest)
+            })
+            .then(response => response.json())
+            .then(data => addAnswer(data))
+            .catch(error => console.error('Unable to call api: ', error));
+        }
+
+        function addAnswer(data) {
+            addAssitantMessage(data);
+            displayMessages();
+            speak(data.summary);
+            console.log(messages);
+        }
+
+        function img_create(src, alt, title) {
+            var img = document.createElement('img');
+            img.src = 'https://storeblodassistent.blob.core.windows.net/documents/' + src;
+            if ( alt != null ) img.alt = alt;
+            if ( title != null ) img.title = title;
+            return img;
+        }
+
+        function displayMessages() {
+            const chatMessages = document.querySelector('.chat-messages');
+            chatMessages.innerHTML = "";
+            messages.forEach(element => {
+                const div = document.createElement('div');
+                div.className = element.role;
+
+                // Create icon element
+                const icon = document.createElement('i');
+                if (element.role === 'assistant') {
+                    icon.className = 'fas fa-robot'; // FontAwesome icon for bot
+                } else {
+                    icon.className = 'fas fa-user'; // FontAwesome icon for user
+                }
+                
+                // Create text element
+                const text = document.createElement('span');
+                text.textContent = ' ' + element.content;
+                
+                // Append icon and text to div
+                div.appendChild(icon);
+                div.appendChild(text);
+                chatMessages.appendChild(div); 
+
+                if (element.image !== '') {
+                    const img = img_create(element.image, 'image', 'image');
+                    img.className = 'plot';
+                    chatMessages.appendChild(img); 
+                }
+
+            });
+
+            // Scroll to the bottom of the chat
+            chatMessages.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+
+            console.log('displayMessages');
+        }
+
+        function initializeAssistant() {
+            const initalMessage = { 
+                summary: "Hello, I am Autosence Fleet your AI assistant that can help you with data analysis tasks. How can I assist you today?",
+                image_name: ''
+            };
+            addAnswer(initalMessage);
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            //initianting the assistant
+            if(messages.length == 0) {
+                initializeAssistant();
+                
+                /*
+                const chatMessages = document.querySelector('.chat-messages');
+                const divPlot = document.createElement('div');
+                divPlot.className = 'plot';
+                const img = img_create('plot_alerts_8192.png', 'image', 'image');
+                img.className = 'plot';
+                divPlot.appendChild(img);
+                chatMessages.appendChild(img); 
+                */
+            }
+        });
+    </script>
+</body>
+
+</html>
